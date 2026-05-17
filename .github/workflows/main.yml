@@ -1,0 +1,42 @@
+name: Windows-RDP-Tailscale
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 360
+
+    steps:
+    - name: Download Tailscale
+      run: |
+        Invoke-WebRequest https://pkgs.tailscale.com/stable/tailscale-setup-latest.exe -OutFile tailscale.exe
+
+    - name: Install Tailscale
+      run: |
+        Start-Process .\tailscale.exe /SILENT -Wait
+
+    - name: Connect Tailscale
+      run: |
+        & "C:\Program Files\Tailscale\tailscale.exe" up --authkey $env:TS_KEY
+      env:
+        TS_KEY: ${{ secrets.TS_KEY }}
+
+    - name: Enable RDP
+      run: |
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -value 0
+        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+
+    - name: Create User
+      run: |
+        net user runneradmin Password123! /add
+        net localgroup administrators runneradmin /add
+
+    - name: Show Tailscale IP
+      run: |
+        & "C:\Program Files\Tailscale\tailscale.exe" ip -4
+
+    - name: Keep Alive
+      run: |
+        ping -t 127.0.0.1
