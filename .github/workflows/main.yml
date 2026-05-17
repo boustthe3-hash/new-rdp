@@ -28,10 +28,9 @@ jobs:
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -value 0
         Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
 
-    - name: Create User
+    - name: Change Password
       run: |
-        net user runneradmin Password123! /add
-        net localgroup administrators runneradmin /add
+        net user runneradmin NewPass123!
 
     - name: Show Tailscale IP
       run: |
