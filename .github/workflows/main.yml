@@ -9,33 +9,36 @@ jobs:
     timeout-minutes: 360
 
     steps:
-    - name: Download Tailscale
-      run: |
-        Invoke-WebRequest https://pkgs.tailscale.com/stable/tailscale-setup-latest.exe -OutFile tailscale.exe
+      - name: Download Tailscale
+        run: |
+          Invoke-WebRequest https://pkgs.tailscale.com/stable/tailscale-setup-latest.exe -OutFile tailscale.exe
 
-    - name: Install Tailscale
-      run: |
-        Start-Process .\tailscale.exe /SILENT -Wait
+      - name: Install Tailscale
+        run: |
+          Start-Process .\tailscale.exe /SILENT -Wait
 
-    - name: Connect Tailscale
-      run: |
-        & "C:\Program Files\Tailscale\tailscale.exe" up --authkey $env:TS_KEY
-      env:
-        TS_KEY: ${{ secrets.TS_KEY }}
+      - name: Connect Tailscale
+        env:
+          TS_KEY: ${{ secrets.TS_KEY }}
+        run: |
+          & "C:\Program Files\Tailscale\tailscale.exe" up --authkey $env:TS_KEY
 
-    - name: Enable RDP
-      run: |
-        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -value 0
-        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+      - name: Enable RDP
+        run: |
+          Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
+          Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
 
-    - name: Change Password
-      run: |
-        net user runneradmin NewPass123!
+      - name: Change Password
+        run: |
+          net user runneradmin 123456Aa!
 
-    - name: Show Tailscale IP
-      run: |
-        & "C:\Program Files\Tailscale\tailscale.exe" ip -4
+      - name: Show Tailscale IP
+        run: |
+          & "C:\Program Files\Tailscale\tailscale.exe" ip -4
 
-    - name: Keep Alive
-      run: |
-        ping -t 127.0.0.1
+      - name: Keep Alive
+        run: |
+          while ($true) {
+            Write-Host "RDP Still Running"
+            Start-Sleep -Seconds 60
+          }
