@@ -39,6 +39,7 @@ jobs:
       - name: Keep Alive
         run: |
           while ($true) {
-            Write-Host "RDP Still Running"
-            Start-Sleep -Seconds 60
+            Write-Host "RDP Active $(Get-Date)"
+            Get-Process | Out-Null
+            Start-Sleep -Seconds 20
           }
